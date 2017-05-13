@@ -1,0 +1,120 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+   <style>
+      .button {
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 32px;
+        margin: 8px 16px;
+        cursor: pointer;
+      }
+      .inputtxt {font-size: 32px;}
+      .blue {background-color: #008CBA;}
+      .green {background-color: #4CAF50;}
+      .red {background-color: #f44336;}
+      .black {background-color: #555555;}
+    </style>
+      <script type="text/javascript">
+          var ws;
+          var msgState="*22222222";
+
+          function switchon(val) {
+            disableButton();
+            ws.send(val);
+          }
+
+          function send() {
+            var txtStr = document.getElementById("txtSend").value;
+            ws.send(txtStr);
+          }
+
+          function disableButton() {
+            for(i = 0; i < 8;i++) {
+              var btnEl = document.getElementById("btn" + i);
+              btnEl.classList.remove("black");
+              btnEl.classList.remove("red");
+              btnEl.innerHTML = "Tunggu";
+              btnEl.disabled = true;
+            }
+          }
+
+          function enableButton() {
+            for(i = 0; i < 8;i++) {
+              var btnEl = document.getElementById("btn" + i);
+              btnEl.innerHTML = "Tombol " + (i + 1);
+              btnEl.disabled = false;
+            }
+          }
+
+          function setButton(val) {
+            var n = val.length - 1;
+            for(i = 0; i < n;i++) {
+              var btnEl = document.getElementById("btn" + (n - i - 1));
+              if(val[i + 1] == '0') {
+                btnEl.classList.remove("black");
+                btnEl.classList.add("red");
+              }
+              else if (val[i + 1] == '1') {
+                btnEl.classList.remove("red");
+                btnEl.classList.add("black");
+              }
+            }
+            msgState = val;
+          }
+
+          function connect() {
+            var _ipStr = document.getElementById("ipaddress").value;
+            connectToIp(_ipStr);
+          }
+
+         function connectToIp(ipStr) {
+
+            if ("WebSocket" in window)
+            {
+               ws = new WebSocket("ws://" + ipStr);
+
+               ws.onopen = function()
+               {
+                  ws.send('?');
+                  alert("Websocket Tersambung");
+               };
+
+               ws.onmessage = function (evt)
+               {
+                  var msg = evt.data;
+                  document.getElementById("txtRecv").value = msg;
+                  if(msg[0] == '*') {
+                    enableButton();
+                    setButton(msg);
+                  }
+               };
+
+               ws.onclose = function()
+               {
+                  alert("Sambungan sudah ditutup...");
+               };
+            }
+
+            else
+            {
+               alert("WebSocket TIDAK didukung oleh Browser Anda!");
+            }
+         }
+      </script>
+
+   </head>
+   <body>
+     <input type="text" name="ip" class="inputxt" id="ipaddress"><button type="button" class="button green" onclick="connect()">Sambung</button><br>
+     <input type="text" name="txtSend" class="inputxt" id="txtSend"><button type="button" class="button green" onclick="send()">Kirim</button><br>
+     <button type="button" class="button" id="btn0" onclick="switchon('#0')">Tombol 1</button><button type="button" class="button" id="btn7" onclick="switchon('#7')">Tombol 8</button><br>
+     <button type="button" class="button" id="btn1" onclick="switchon('#1')">Tombol 2</button><button type="button" class="button" id="btn6" onclick="switchon('#6')">Tombol 7</button><br>
+     <button type="button" class="button" id="btn2" onclick="switchon('#2')">Tombol 3</button><button type="button" class="button" id="btn5" onclick="switchon('#5')">Tombol 6</button><br>
+     <button type="button" class="button" id="btn3" onclick="switchon('#3')">Tombol 4</button><button type="button" class="button" id="btn4" onclick="switchon('#4')">Tombol 5</button><br>
+     <input type="text" name="txtRecv" id="txtRecv">
+   </body>
+</html>

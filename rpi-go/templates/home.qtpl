@@ -1,0 +1,76 @@
+{% code
+type Home struct {
+	OUT []int
+	LBL []string
+	VAL []int
+	IPTGTADDR string
+	WEBPROXYADDR string
+	WSPROXYADDR string
+}
+%}
+
+{% func PageHome(p *Home) %}
+<html>
+<head>
+<title>RPI Home CLICK</title>
+<style>
+	.button {
+		border: none;
+		color: white;
+		padding: 15px 32px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 32px;
+		margin: 8px 16px;
+		cursor: pointer;
+	}
+
+	.iframe {
+		min-width: 500;
+		min-height: 600;
+		max-width: 100%;
+		max-height: 100%;
+	}
+
+	.green {background-color: #4CAF50;}
+	.black {background-color: #555555;}
+	.red {background-color: #f44336; color: white;}
+	.blue {background-color: #008CBA; color:white;}
+
+</style>
+</head>
+<body>
+    {% if len(p.OUT) == 0 %}
+        No button
+        {% return %}
+    {% endif %}
+
+    {% for i, label := range p.LBL %}
+	<div><form action="/" method="post">
+	<input type="hidden" name="v" value="{%d p.VAL[i] %}"></input>
+	<input type="hidden" name="o" value="{%d p.OUT[i] %}"></input>
+	<input class="button
+	{% if p.VAL[i] > 0 %}
+		red
+        {% else%}
+		blue
+        {% endif %}
+	" type="submit" value="{%s label %}"></input>
+	{% if p.VAL[i] > 0 %}
+                <span> Status: ON </span>
+        {% else%}
+                <span> Status: OFF </span>
+        {% endif %}
+	</form></div>
+    {% endfor %}
+		{% if len(p.IPTGTADDR) > 0 %}
+			<div>
+				<p>Local Wemos WebServer Found at: {%s p.IPTGTADDR %}<br>
+					 <a href="http://{%s p.WEBPROXYADDR %}/?wsaddr={%s p.WSPROXYADDR %}">Buka Proxy Wemos WebServer</a></p>
+					 <iframe src="http://{%s p.WEBPROXYADDR %}/?wsaddr={%s p.WSPROXYADDR %}" class="iframe"></iframe>
+			</div>
+		{% endif %}
+</body>
+</html>
+{% endfunc %}
